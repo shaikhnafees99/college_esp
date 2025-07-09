@@ -1,8 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'dart:async';
-import 'dart:convert';
 
 class CameraController extends GetxController {
   final TextEditingController ipController = TextEditingController();
@@ -19,7 +20,7 @@ class CameraController extends GetxController {
   void onInit() {
     super.onInit();
     // Set default IP for testing
-    ipController.text = '192.168.1.100';
+    ipController.text = '10.32.34.224';
   }
 
   @override
@@ -42,10 +43,11 @@ class CameraController extends GetxController {
 
     try {
       // Test connection first
-      final response = await http.get(
-        Uri.parse('http://$ip/status'),
-        headers: {'Connection': 'close'},
-      ).timeout(Duration(seconds: 5));
+      final response = await http
+          .get(
+            Uri.parse('http://$ip/status'),
+          )
+          .timeout(Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         // Parse status response
@@ -57,7 +59,7 @@ class CameraController extends GetxController {
         errorMessage.value = '';
 
         // Start periodic connection check
-        _startConnectionCheck();
+        // _startConnectionCheck();
 
         Get.snackbar(
           'Success',
@@ -84,39 +86,39 @@ class CameraController extends GetxController {
     }
   }
 
-  void _startConnectionCheck() {
-    _connectionTimer?.cancel();
-    _connectionTimer = Timer.periodic(Duration(seconds: 10), (timer) {
-      _checkConnection();
-    });
-  }
+  // void _startConnectionCheck() {
+  //   _connectionTimer?.cancel();
+  //   _connectionTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+  //     _checkConnection();
+  //   });
+  // }
 
-  Future<void> _checkConnection() async {
-    if (streamUrl.value.isEmpty) return;
+  // Future<void> _checkConnection() async {
+  //   if (streamUrl.value.isEmpty) return;
 
-    try {
-      String ip = ipController.text.trim();
-      final response = await http.get(
-        Uri.parse('http://$ip/status'),
-        headers: {'Connection': 'close'},
-      ).timeout(Duration(seconds: 3));
+  //   try {
+  //     String ip = ipController.text.trim();
+  //     final response = await http.get(
+  //       Uri.parse('http://$ip/status'),
+  //       headers: {'Connection': 'close'},
+  //     ).timeout(Duration(seconds: 3));
 
-      if (response.statusCode == 200) {
-        final statusData = json.decode(response.body);
-        flashState.value = statusData['flash_state'] == 'on';
+  //     if (response.statusCode == 200) {
+  //       final statusData = json.decode(response.body);
+  //       flashState.value = statusData['flash_state'] == 'on';
 
-        if (!isConnected.value) {
-          isConnected.value = true;
-          errorMessage.value = '';
-        }
-      } else {
-        throw Exception('Connection lost');
-      }
-    } catch (e) {
-      isConnected.value = false;
-      errorMessage.value = 'Connection lost';
-    }
-  }
+  //       if (!isConnected.value) {
+  //         isConnected.value = true;
+  //         errorMessage.value = '';
+  //       }
+  //     } else {
+  //       throw Exception('Connection lost');
+  //     }
+  //   } catch (e) {
+  //     isConnected.value = false;
+  //     errorMessage.value = 'Connection lost';
+  //   }
+  // }
 
   void refreshStream() {
     if (streamUrl.value.isNotEmpty) {
@@ -148,7 +150,7 @@ class CameraController extends GetxController {
       final response = await http.get(
         Uri.parse('http://$ip/flash?state=$newState'),
         headers: {'Connection': 'close'},
-      ).timeout(Duration(seconds: 3));
+      ).timeout(Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);

@@ -1,16 +1,19 @@
 import 'package:college_esp/camera_controller.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
+import 'package:mjpeg_stream/mjpeg_stream.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'ESP32-CAM Stream',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -22,6 +25,8 @@ class MyApp extends StatelessWidget {
 
 class CameraStreamPage extends StatelessWidget {
   final CameraController controller = Get.put(CameraController());
+
+  CameraStreamPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,31 +110,12 @@ class CameraStreamPage extends StatelessWidget {
                 );
               }
 
-              return Container(
+              return SizedBox(
                 width: double.infinity,
                 height: double.infinity,
-                child: Image.network(
-                  controller.streamUrl.value,
-                  fit: BoxFit.contain,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(child: CircularProgressIndicator());
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error, size: 64, color: Colors.red),
-                          SizedBox(height: 16),
-                          Text(
-                            'Failed to load stream',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                child: MJPEGStreamScreen(
+                  showLiveIcon: true,
+                  streamUrl: controller.streamUrl.value,
                 ),
               );
             }),
@@ -142,28 +128,18 @@ class CameraStreamPage extends StatelessWidget {
               children: [
                 // Flash Control
                 Obx(() => ElevatedButton.icon(
-                      onPressed: controller.isConnected.value
-                          ? () => controller.toggleFlash()
-                          : null,
+                      onPressed: controller.isConnected.value ? () => controller.toggleFlash() : null,
                       icon: Icon(
-                        controller.flashState.value
-                            ? Icons.flash_on
-                            : Icons.flash_off,
+                        controller.flashState.value ? Icons.flash_on : Icons.flash_off,
                       ),
-                      label: Text(controller.flashState.value
-                          ? 'Flash ON'
-                          : 'Flash OFF'),
+                      label: Text(controller.flashState.value ? 'Flash ON' : 'Flash OFF'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: controller.flashState.value
-                            ? Colors.orange
-                            : Colors.grey,
+                        backgroundColor: controller.flashState.value ? Colors.orange : Colors.grey,
                       ),
                     )),
                 // Refresh Button
                 ElevatedButton.icon(
-                  onPressed: controller.isConnected.value
-                      ? () => controller.refreshStream()
-                      : null,
+                  onPressed: controller.isConnected.value ? () => controller.refreshStream() : null,
                   icon: Icon(Icons.refresh),
                   label: Text('Refresh'),
                 ),
@@ -176,22 +152,14 @@ class CameraStreamPage extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      controller.isConnected.value
-                          ? Icons.wifi
-                          : Icons.wifi_off,
-                      color: controller.isConnected.value
-                          ? Colors.green
-                          : Colors.red,
+                      controller.isConnected.value ? Icons.wifi : Icons.wifi_off,
+                      color: controller.isConnected.value ? Colors.green : Colors.red,
                     ),
                     SizedBox(width: 8),
                     Text(
-                      controller.isConnected.value
-                          ? 'Connected'
-                          : 'Disconnected',
+                      controller.isConnected.value ? 'Connected' : 'Disconnected',
                       style: TextStyle(
-                        color: controller.isConnected.value
-                            ? Colors.green
-                            : Colors.red,
+                        color: controller.isConnected.value ? Colors.green : Colors.red,
                       ),
                     ),
                   ],
